@@ -1,0 +1,135 @@
+version: '2.2'
+
+volumes:
+  feedbin_redis:
+  feedbin_db:
+  feedbin_elasticsearch:
+  feedbin_minio:
+  feedbin_caddy:
+
+services:
+
+  feedbin-caddy:
+    image: abiosoft/caddy:1.0.3
+    volumes:
+      - feedbin_caddy:/etc/ssl/caddy
+      - ./caddy/Caddyfile:/etc/Caddyfile:ro
+    env_file:
+     - ./.env
+    ports:
+      - 80:80
+      - 443:443
+      - 2015:2015
+    links:
+      - feedbin-web:feedbin-web
+      - feedbin-minio:minio
+    restart: always
+
+  feedbin-minio:
+    image: minio/minio
+    volumes:
+    - feedbin_minio:/data
+    env_file:
+     - ./.env
+    command: server /data
+    ports:
+      - 127.0.0.1:9000:9000
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 30s
+      timeout: 20s
+      retries: 3
+    restart: always
+
+  feedbin-web:
+    build: .
+    ports:
+      - 127.0.0.1:3000:3000
+    environment:
+      PORT: 3000
+    env_file:
+     - ./.env
+    command: bundle exec rails s --port 3000 --binding 0.0.0.0
+    links:
+      - feedbin-redis:redis
+      - feedbin-postgres:postgres
+      - feedbin-elasticsearch:elasticsearch
+      - feedbin-memcached:memcached
+      - feedbin-minio:minio
+    restart: always
+
+  feedbin-workers:
+    build: .
+    env_file:
+     - ./.env
+    command: foreman start
+    links:
+      - feedbin-redis:redis
+      - feedbin-postgres:postgres
+      - feedbin-elasticsearch:elasticsearch
+      - feedbin-memcached:memcached
+      - feedbin-minio:minio
+    restart: always
+
+  feedbin-elasticsearch:
+    image: elasticsearch:2.4
+    ports:
+      - 127.0.0.1:9200:9200
+    volumes:
+      - feedbin_elasticsearch:/usr/share/elasticsearch/data
+    environment:
+      - bootstrap.memory_lock=true
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+      - discovery.type=single-node
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    mem_limit: 512m
+    restart: always
+
+  feedbin-refresher:
+    build: ./feedbin-refresher
+    env_file:
+     - ./.env
+    links:
+      - feedbin-redis:feedbin-redis
+    restart: always
+
+  feedbin-image:
+    build: ./feedbin-image
+    env_file:
+      - ./.env
+    links:
+        - feedbin-redis:redis
+    restart: always
+
+  camo:
+    image: inventid/camo
+    environment:
+      - PORT=8081
+    env_file:
+     - ./.env
+    ports:
+      - 127.0.0.1:8081:8081
+    restart: always
+
+  feedbin-memcached:
+    image: memcached:1.5
+    restart: always
+
+  feedbin-redis:
+    image: redis:5
+    command: "redis-server --appendonly yes"
+    volumes:
+      - feedbin_redis:/data
+    restart: always
+
+  feedbin-postgres:
+    image: postgres:10
+    env_file:
+     - ./.env
+    volumes:
+      - feedbin_db:/var/lib/postgresql/data
+    restart: always
+

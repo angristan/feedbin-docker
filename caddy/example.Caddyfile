@@ -1,0 +1,20 @@
+feedbin.domain.tld {
+  gzip
+  proxy / http://feedbin-web:3000 {
+    transparent
+  }
+}
+
+camo.feedbin.domain.tld {
+  gzip
+  proxy / http://camo:8081 {
+    transparent
+  }
+}
+
+minio.feedbin.domain.tld {
+  gzip
+  proxy / http://minio:9000 {
+    transparent
+  }
+}

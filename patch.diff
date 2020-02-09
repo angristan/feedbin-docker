@@ -1,0 +1,27 @@
+diff --git a/config/environments/production.rb b/config/environments/production.rb
+index 63f9d81d8..91e56b27f 100644
+--- a/config/environments/production.rb
++++ b/config/environments/production.rb
+@@ -5,6 +5,7 @@
+   config.hosts << "api.feedbin.me"
+   config.hosts << "feedbin"
+   config.hosts << "api.feedbin"
++  config.hosts << ENV['FEEDBIN_HOST']
+ 
+   # Code is not reloaded between requests.
+   config.cache_classes = true
+diff --git a/config/initializers/carrierwave.rb b/config/initializers/carrierwave.rb
+index 8032026f..ac21058d 100644
+--- a/config/initializers/carrierwave.rb
++++ b/config/initializers/carrierwave.rb
+@@ -4,6 +4,10 @@ if ENV["AWS_ACCESS_KEY_ID"] && ENV["AWS_SECRET_ACCESS_KEY"]
+       provider: "AWS",
+       aws_access_key_id: ENV["AWS_ACCESS_KEY_ID"],
+       aws_secret_access_key: ENV["AWS_SECRET_ACCESS_KEY"],
++      region: ENV["AWS_S3_REGION"] || "us-east-1",
++      host: ENV["AWS_S3_HOST"] || "s3.amazonaws.com",
++      endpoint: ENV["AWS_S3_ENDPOINT"] || nil,
++      path_style: ENV["AWS_S3_PATH_STYLE"] || false,
+     }
+     config.fog_directory = ENV["AWS_S3_BUCKET"]
+     config.max_file_size = 5.megabytes
