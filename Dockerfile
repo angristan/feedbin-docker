@@ -17,9 +17,6 @@ RUN cd /app \
     && bundle install \
     && bundle exec rake assets:precompile
 
-COPY patch.diff /app/patch.diff
-RUN cd /app && git apply patch.diff
-
 ENV RAILS_SERVE_STATIC_FILES=true
 
 EXPOSE 3000

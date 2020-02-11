@@ -9,8 +9,5 @@ RUN apt-get update \
     && gem install bundler \
     && bundle install
 
-COPY patch.diff /app/patch.diff
-RUN cd /app && git apply patch.diff
-
 CMD ["bundle", "exec", "foreman", "start"]
 
