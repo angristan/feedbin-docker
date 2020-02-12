@@ -74,5 +74,5 @@ You can make yourself an admin to manage users and to view the Sidekiq web inter
 To do so, run `docker exec -it feedbin-docker_feedbin-postgres_1 psql -U feedbin feedbin_production`, and enter:
 
 ```sql
-UPDATE users SET admin=true WHERE id=1
+UPDATE users SET admin=true WHERE id=1;
 ```
