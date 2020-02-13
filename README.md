@@ -35,7 +35,7 @@ I recommend a server with **more than 2 GB of RAM**. Otherwise you will likely h
 Clone the repo:
 
 ```
-git clone https://github.com/angristan/docker-feedbin.git
+git clone https://github.com/angristan/feedbin-docker.git
 ```
 
 * Copy `.env.example` to `.env` and fill **ALL** the variables
