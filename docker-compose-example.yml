@@ -44,6 +44,8 @@ services:
       - 127.0.0.1:3000:3000
     environment:
       PORT: 3000
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000"]
     env_file:
      - ./.env
     command: bundle exec rails s --port 3000 --binding 0.0.0.0
@@ -74,6 +76,8 @@ services:
     image: elasticsearch:2.4
     ports:
       - 127.0.0.1:9200:9200
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9200"]
     volumes:
       - feedbin_elasticsearch:/usr/share/elasticsearch/data
     environment:
@@ -113,6 +117,8 @@ services:
      - ./.env
     ports:
       - 127.0.0.1:8081:8081
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8081"]
     restart: always
 
   feedbin-memcached:
