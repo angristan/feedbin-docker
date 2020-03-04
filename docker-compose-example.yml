@@ -36,9 +36,6 @@ services:
       - 127.0.0.1:9000:9000
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
-      interval: 30s
-      timeout: 20s
-      retries: 3
     restart: always
 
   feedbin-web:
@@ -57,6 +54,7 @@ services:
       - feedbin-memcached:memcached
       - feedbin-minio:minio
     restart: always
+    mem_limit: 512m
 
   feedbin-workers:
     build: .
@@ -70,6 +68,7 @@ services:
       - feedbin-memcached:memcached
       - feedbin-minio:minio
     restart: always
+    mem_limit: 512m
 
   feedbin-elasticsearch:
     image: elasticsearch:2.4
@@ -95,6 +94,7 @@ services:
     links:
       - feedbin-redis:feedbin-redis
     restart: always
+    mem_limit: 512m
 
   feedbin-image:
     build: ./feedbin-image
@@ -103,6 +103,7 @@ services:
     links:
         - feedbin-redis:redis
     restart: always
+    mem_limit: 512m
 
   camo:
     image: inventid/camo
@@ -132,4 +133,5 @@ services:
     volumes:
       - feedbin_db:/var/lib/postgresql/data
     restart: always
+    mem_limit: 512m
 
