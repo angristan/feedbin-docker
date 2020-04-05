@@ -71,8 +71,8 @@ Now go to `feedbin.domain.tld` and create a new account. You're set!
 
 You can make yourself an admin to manage users and to view the Sidekiq web interface.
 
-To do so, run `docker exec -it feedbin-docker_feedbin-postgres_1 psql -U feedbin feedbin_production`, and enter:
+To do so, run:
 
-```sql
-UPDATE users SET admin=true WHERE id=1;
+```sh
+docker-compose exec feedbin-web rake feedbin:make_admin[youremail@domain.tld]
 ```
