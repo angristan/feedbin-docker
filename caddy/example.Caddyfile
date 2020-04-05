@@ -18,3 +18,10 @@ minio.feedbin.domain.tld {
     transparent
   }
 }
+
+extract.feedbin.domain.tld {
+  gzip
+  proxy / http://feedbin-extract:3000 {
+    transparent
+  }
+}

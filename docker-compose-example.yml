@@ -141,3 +141,9 @@ services:
     restart: always
     mem_limit: 512m
 
+  feedbin-extract:
+    build: ./feedbin-extract
+    env_file:
+      - ./.env
+    restart: always
+    mem_limit: 512m
