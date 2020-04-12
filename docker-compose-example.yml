@@ -110,7 +110,7 @@ services:
     mem_limit: 512m
 
   camo:
-    image: inventid/camo
+    image: increments/camo
     environment:
       - PORT=8081
     env_file:
