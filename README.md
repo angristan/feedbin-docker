@@ -34,7 +34,7 @@ I recommend a server with **more than 2 GB of RAM**. Otherwise you will likely h
 
 Clone the repo:
 
-```
+```sh
 git clone https://github.com/angristan/feedbin-docker.git
 ```
 
@@ -55,7 +55,6 @@ docker-compose up -d
 ```
 
 You can check if everything is going well with `docker-compose logs -f` or `docker-compose ps`.
-
 
 Go to `minio.feedbin.domain.tld`, login with your keys. Then:
 
