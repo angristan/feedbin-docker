@@ -12,6 +12,7 @@ Here is a breakdown of all the containers:
 * `workers`: some of the sidekiq workers for background processing
 * `refresher`: sidekiq worker for refreshing feeds
 * `image`: sidekiq worker to find thumbnails
+* `extract`: nodejs service to extract article content from full web pages
 * `camo`: a node reverse proxy to prevent mixed content
 * `minio`: object storage for images, favicons, imports
 * `redis`: cache, store sidekiq queues and stats
