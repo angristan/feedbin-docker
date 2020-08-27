@@ -5,6 +5,13 @@ feedbin.domain.tld {
   }
 }
 
+api.domain.tld {
+  gzip
+  proxy / http://feedbin-web:3000 {
+    transparent
+  }
+}
+
 camo.feedbin.domain.tld {
   gzip
   proxy / http://camo:8081 {
