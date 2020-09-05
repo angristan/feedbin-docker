@@ -77,7 +77,7 @@ To do so, run:
 docker-compose exec feedbin-web rake feedbin:make_admin[youremail@domain.tld]
 ```
 
-Upgrade
+## Upgrade
 ```sh
 docker-compose run --rm feedbin-web rake db:migrate
 ```
