@@ -78,6 +78,27 @@ docker-compose exec feedbin-web rake feedbin:make_admin[youremail@domain.tld]
 ```
 
 ## Upgrade
+
+* Stop containers
+
+```sh
+docker-compose down
+```
+
+* Rebuild
+
+```sh
+docker-compose build --no-cache
+```
+
+* Start containers
+
+```sh
+docker-compose up -d
+```
+
+* Migrate database 
+
 ```sh
 docker-compose run --rm feedbin-web rake db:migrate
 ```
