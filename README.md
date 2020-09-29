@@ -76,3 +76,5 @@ To do so, run:
 ```sh
 docker-compose exec feedbin-web rake feedbin:make_admin[youremail@domain.tld]
 ```
+
+Once you're done, you can prevent new users from registering by [modifying cour Caddy config](https://github.com/angristan/feedbin-docker/issues/3#issuecomment-700286769).
