@@ -20,9 +20,6 @@ services:
       - 80:80
       - 443:443
       - 2015:2015
-    links:
-      - feedbin-web:feedbin-web
-      - feedbin-minio:minio
     restart: always
 
   feedbin-minio:
@@ -32,16 +29,12 @@ services:
     env_file:
      - ./.env
     command: server /data
-    ports:
-      - 127.0.0.1:9000:9000
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
     restart: always
 
   feedbin-web:
     build: .
-    ports:
-      - 127.0.0.1:3000:3000
     environment:
       PORT: 3000
     healthcheck:
@@ -49,12 +42,6 @@ services:
     env_file:
      - ./.env
     command: bundle exec rails s --port 3000 --binding 0.0.0.0
-    links:
-      - feedbin-redis:redis
-      - feedbin-postgres:postgres
-      - feedbin-elasticsearch:elasticsearch
-      - feedbin-memcached:memcached
-      - feedbin-minio:minio
     restart: always
     mem_limit: 512m
 
@@ -63,19 +50,11 @@ services:
     env_file:
      - ./.env
     command: foreman start
-    links:
-      - feedbin-redis:redis
-      - feedbin-postgres:postgres
-      - feedbin-elasticsearch:elasticsearch
-      - feedbin-memcached:memcached
-      - feedbin-minio:minio
     restart: always
     mem_limit: 512m
 
   feedbin-elasticsearch:
     image: elasticsearch:2.4
-    ports:
-      - 127.0.0.1:9200:9200
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:9200"]
     volumes:
@@ -95,8 +74,6 @@ services:
     build: ./feedbin-refresher
     env_file:
      - ./.env
-    links:
-      - feedbin-redis:feedbin-redis
     restart: always
     mem_limit: 512m
 
@@ -104,8 +81,6 @@ services:
     build: ./feedbin-image
     env_file:
       - ./.env
-    links:
-        - feedbin-redis:redis
     restart: always
     mem_limit: 512m
 
@@ -115,8 +90,6 @@ services:
       - PORT=8081
     env_file:
      - ./.env
-    ports:
-      - 127.0.0.1:8081:8081
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8081"]
     restart: always
