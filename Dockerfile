@@ -1,5 +1,7 @@
 FROM ruby:2.6
 
+ARG FEEDBIN_URL
+
 WORKDIR /app
 
 RUN apt-get update \

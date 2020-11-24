@@ -34,7 +34,10 @@ services:
     restart: always
 
   feedbin-web:
-    build: .
+    build:
+      context: .
+      args:
+        FEEDBIN_URL: ${FEEDBIN_URL}
     environment:
       PORT: 3000
     healthcheck:
