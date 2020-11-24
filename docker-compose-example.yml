@@ -118,7 +118,11 @@ services:
     mem_limit: 512m
 
   feedbin-extract:
-    build: ./feedbin-extract
+    build:
+      context: ./feedbin-extract
+      args:
+        EXTRACT_USER: ${EXTRACT_USER}
+        EXTRACT_SECRET: ${EXTRACT_SECRET}
     env_file:
       - ./.env
     restart: always
