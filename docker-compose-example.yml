@@ -109,7 +109,7 @@ services:
     restart: always
 
   feedbin-postgres:
-    image: postgres:10
+    image: postgres:13
     env_file:
      - ./.env
     volumes:
