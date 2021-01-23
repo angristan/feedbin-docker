@@ -1,13 +1,11 @@
 FROM node:12
 
-ARG EXTRACT_USER
-ARG EXTRACT_SECRET
-
 WORKDIR /app
 
 RUN git clone https://github.com/feedbin/extract.git /app \
     && npm install \
-    && mkdir users \
-    && echo ${EXTRACT_SECRET} > users/${EXTRACT_USER}
+    && mkdir users 
 
-CMD ["node", "app/server.js"]
+COPY docker-entrypoint.sh /usr/bin/docker-entrypoint.sh
+
+ENTRYPOINT ["/usr/bin/docker-entrypoint.sh"]
