@@ -17,4 +17,6 @@ RUN apk add --no-cache \
     && gem install bundler \
     && bundle install
 
+RUN sed -i 's/-c [[:digit:]]*/-c ${SIDEKIQ_CONCURRENCY:-1}/g' /app/Procfile
+
 CMD ["bundle", "exec", "foreman", "start"]

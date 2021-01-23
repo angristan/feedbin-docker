@@ -31,6 +31,8 @@ RUN apk add --no-cache \
     && bundle install \
     && bundle exec rake assets:precompile
 
+RUN sed -i 's/-c [[:digit:]]*/-c ${SIDEKIQ_CONCURRENCY:-1}/g' /app/Procfile
+
 ENV RAILS_SERVE_STATIC_FILES=true
 
 EXPOSE 3000
