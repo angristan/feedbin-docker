@@ -1,5 +1,3 @@
-version: '3.4'
-
 x-common-variables: &feedbin-environment
 - PORT
 - RACK_ENV
@@ -88,7 +86,6 @@ services:
       /usr/bin/mc policy set download minio/$MINIO_BUCKET;
       exit 0;
       "
-
   feedbin-web:
     build:
       context: ./feedbin-web
@@ -161,9 +158,6 @@ services:
   feedbin-extract:
     build:
       context: ./feedbin-extract
-      args:
-        EXTRACT_USER: $EXTRACT_USER
-        EXTRACT_SECRET: $EXTRACT_SECRET
     container_name: feedbin-extract
     restart: unless-stopped
 
