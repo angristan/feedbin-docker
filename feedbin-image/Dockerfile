@@ -1,5 +1,7 @@
 FROM alpine:3.13
 
+ARG FEEDBIN_IMAGE_REPO
+
 WORKDIR /app
 
 RUN apk add --no-cache \
@@ -11,7 +13,7 @@ RUN apk add --no-cache \
     ruby-json \
     libxml2-dev \ 
     vips-dev \
-    && git clone https://github.com/feedbin/image.git /app \
+    && git clone ${FEEDBIN_IMAGE_REPO:-https://github.com/feedbin/image.git} /app \
     && gem install bundler \
     && bundle install
 

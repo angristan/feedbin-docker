@@ -1,6 +1,7 @@
 FROM alpine:3.13
 
 ARG FEEDBIN_URL
+ARG FEEDBIN_REPO
 
 WORKDIR /app
 
@@ -25,7 +26,7 @@ RUN apk add --no-cache \
     libpq \
     postgresql-dev \
     && gem install 'etc:1.2.0' 'idn-ruby:0.1.0' \
-    && git clone https://github.com/feedbin/feedbin.git /app \
+    && git clone ${FEEDBIN_REPO:-https://github.com/feedbin/feedbin.git} /app \
     && gem install bundler \
     && bundle install \
     && bundle exec rake assets:precompile
