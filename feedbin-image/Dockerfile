@@ -15,7 +15,8 @@ RUN apk add --no-cache \
     vips-dev \
     && git clone ${FEEDBIN_IMAGE_REPO:-https://github.com/feedbin/image.git} /app \
     && gem install bundler \
-    && bundle install
+    && bundle install \
+    && rm -rf .git
 
 RUN sed -i 's/-c [[:digit:]]*/-c ${SIDEKIQ_CONCURRENCY:-1}/g' /app/Procfile
 

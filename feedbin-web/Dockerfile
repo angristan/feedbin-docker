@@ -29,7 +29,8 @@ RUN apk add --no-cache \
     && git clone ${FEEDBIN_REPO:-https://github.com/feedbin/feedbin.git} /app \
     && gem install bundler \
     && bundle install \
-    && bundle exec rake assets:precompile
+    && bundle exec rake assets:precompile \
+    && rm -rf .git
 
 RUN sed -i 's/-c [[:digit:]]*/-c ${SIDEKIQ_CONCURRENCY:-1}/g' /app/Procfile
 
