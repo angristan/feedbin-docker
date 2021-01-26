@@ -15,7 +15,7 @@ services:
       - feedbin_caddy:/etc/ssl/caddy
       - ./caddy/Caddyfile:/etc/Caddyfile:ro
     env_file:
-     - ./.env
+      - ./.env
     ports:
       - 80:80
       - 443:443
@@ -25,25 +25,47 @@ services:
   feedbin-minio:
     image: minio/minio
     volumes:
-    - feedbin_minio:/data
+      - feedbin_minio:/data
     env_file:
-     - ./.env
+      - ./.env
     command: server /data
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
     restart: always
+
+  feedbin-minio-create:
+    image: minio/mc
+    depends_on:
+      - feedbin-minio
+    env_file:
+      - ./.env
+    entrypoint: >
+      /bin/sh -c "
+      sleep 5;
+      /usr/bin/mc config host add minio http://feedbin-minio:9000  ${MINIO_ACCESS_KEY}  ${MINIO_SECRET_KEY};
+      /usr/bin/mc mb minio/${MINIO_BUCKET};
+      /usr/bin/mc policy set download minio/${MINIO_BUCKET};
+      exit 0;
+      "
 
   feedbin-web:
     build:
       context: .
       args:
         FEEDBIN_URL: ${FEEDBIN_URL}
+    depends_on:
+      - feedbin-postgres
+    env_file:
+      - ./.env
     environment:
       PORT: 3000
+      DATABASE_URL: postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${P      OSTGRES_HOST}/${POSTGRES_DB_NAME}
+      AWS_ACCESS_KEY_ID: ${MINIO_ACCESS_KEY}
+      AWS_SECRET_ACCESS_KEY: ${MINIO_SECRET_KEY}
+      AWS_S3_BUCKET: ${MINIO_BUCKET}
+      AWS_S3_BUCKET_FAVICONS: ${MINIO_BUCKET}
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:3000"]
-    env_file:
-     - ./.env
     command: bundle exec rails s --port 3000 --binding 0.0.0.0
     restart: always
     mem_limit: 512m
@@ -52,6 +74,8 @@ services:
     build: .
     env_file:
      - ./.env
+    environment:
+      DATABASE_URL: postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${POSTGRES_HOST}/${POSTGRES_DB_NAME}
     command: foreman start
     restart: always
     mem_limit: 512m
