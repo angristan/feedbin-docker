@@ -43,16 +43,16 @@ git clone https://github.com/angristan/feedbin-docker.git
 * Copy `docker-compose-example.yml` to `docker-compose.yml`. If you want to disable a service this is the place.
 * Copy `caddy/example.Caddyfile` to `caddy/Caddyfile` and update the domains.
 
-Run the database migrations:
-
-```sh
-docker-compose run --rm feedbin-web rake db:setup
-```
-
 Launch everything:
 
 ```sh
 docker-compose up -d
+```
+
+Run the database migrations:
+
+```sh
+docker-compose run --rm feedbin-web rake db:setup
 ```
 
 You can check if everything is going well with `docker-compose logs -f` or `docker-compose ps`.
