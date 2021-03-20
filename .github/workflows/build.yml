@@ -22,6 +22,7 @@ jobs:
 
           - name: feedbin-refresher
             context: feedbin-refresher
+      fail-fast: false
 
     steps:
       - name: Checkout
