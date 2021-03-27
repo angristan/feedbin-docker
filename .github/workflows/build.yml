@@ -12,16 +12,30 @@ jobs:
         image:
           - name: feedbin-web
             context: .
+            file: Dockerfile
             build-args: FEEDBIN_REPO=https://github.com/AndreasSko/feedbin.git
+            tag: latest
+
+          - name: feedbin-web
+            context: .
+            file: alpine.Dockerfile
+            build-args: FEEDBIN_REPO=https://github.com/AndreasSko/feedbin.git
+            tag: alpine
     
           - name: feedbin-extract
+            file: Dockerfile
             context: feedbin-extract
+            tag: latest
 
           - name: feedbin-image
+            file: Dockerfile
             context: feedbin-image
+            tag: latest
 
           - name: feedbin-refresher
+            file: Dockerfile
             context: feedbin-refresher
+            tag: latest
       fail-fast: false
 
     steps:
@@ -43,4 +57,5 @@ jobs:
           context: ${{ matrix.image.context }}
           push: true
           build-args: ${{ matrix.image.build-args }}
-          tags: andreassko/${{ matrix.image.name }}
+          tags: andreassko/${{ matrix.image.name }}:${{ matrix.image.tag }}
+          file: ${{ matrix.image.context }}/${{ matrix.image.file }}
