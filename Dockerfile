@@ -6,6 +6,7 @@ WORKDIR /app
 
 RUN apt-get update \
     && apt-get install -y --no-install-recommends \
+    nodejs \
     libldap-2.4-2 \
     libidn11-dev \
     dnsutils \
