@@ -16,7 +16,7 @@ RUN apt-get update \
 
 RUN git clone https://github.com/feedbin/feedbin.git /app
 
-RUN gem install bundler -v '2.1.2' \
+RUN gem install bundler -v '2.2.15' \
     && bundle install \
     && bundle exec rake assets:precompile
 
