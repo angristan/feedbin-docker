@@ -10,4 +10,3 @@ RUN apt-get update \
     && bundle install
 
 CMD ["bundle", "exec", "foreman", "start"]
-
