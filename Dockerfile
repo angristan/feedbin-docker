@@ -1,4 +1,4 @@
-FROM ruby:2.6
+FROM ruby:2.7
 
 ARG FEEDBIN_URL
 
@@ -6,6 +6,7 @@ WORKDIR /app
 
 RUN apt-get update \
     && apt-get install -y --no-install-recommends \
+    nodejs \
     libldap-2.4-2 \
     libidn11-dev \
     dnsutils \
@@ -15,7 +16,7 @@ RUN apt-get update \
 
 RUN git clone https://github.com/feedbin/feedbin.git /app
 
-RUN gem install bundler -v '2.1.2' \
+RUN gem install bundler -v '2.2.15' \
     && bundle install \
     && bundle exec rake assets:precompile
 
