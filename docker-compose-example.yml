@@ -120,9 +120,6 @@ services:
   feedbin-extract:
     build:
       context: ./feedbin-extract
-      args:
-        EXTRACT_USER: ${EXTRACT_USER}
-        EXTRACT_SECRET: ${EXTRACT_SECRET}
     env_file:
       - ./.env
     restart: always
