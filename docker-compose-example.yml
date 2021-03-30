@@ -38,6 +38,12 @@ services:
       context: .
       args:
         FEEDBIN_URL: ${FEEDBIN_URL}
+    depends_on:
+      - feedbin-redis
+      - feedbin-postgres
+      - feedbin-elasticsearch
+      - feedbin-memcached
+      - feedbin-minio
     environment:
       PORT: 3000
     healthcheck:
