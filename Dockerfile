@@ -1,4 +1,4 @@
-FROM ruby:2.7
+FROM ruby:3.0.1
 
 ARG FEEDBIN_URL
 
