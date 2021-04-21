@@ -60,3 +60,14 @@ jobs:
           build-args: ${{ matrix.image.build-args }}
           tags: andreassko/${{ matrix.image.name }}:${{ matrix.image.tag }}
           file: ${{ matrix.image.context }}/${{ matrix.image.file }}
+
+  trigger-deploy:
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Trigger Deploy workflow on andreassko/infrastructure
+        uses: benc-uk/workflow-dispatch@v1.1
+        with:
+          workflow: Terraform
+          repo: andreassko/infrastructure
+          token: ${{ secrets.WORKFLOW_DISPATCH_GH_TOKEN }}
