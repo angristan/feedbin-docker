@@ -139,6 +139,8 @@ services:
     build: ./feedbin-refresher
     environment:
       - REDIS_URL
+      - TWITTER_KEY
+      - TWITTER_SECRET
     container_name: feedbin-refresher
     restart: unless-stopped
 
