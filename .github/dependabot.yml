@@ -3,16 +3,8 @@ updates:
 - package-ecosystem: docker
   directory: "/"
   schedule:
-    interval: daily
-  assignees:
-    - "angristan"
-  reviewers:
-    - "angristan"
+    interval: weekly
 - package-ecosystem: "github-actions"
   directory: "/"
   schedule:
-    interval: "daily"
-  assignees:
-    - "angristan"
-  reviewers:
-    - "angristan"
+    interval: "weekly"
