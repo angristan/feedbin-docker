@@ -67,4 +67,4 @@ To do so, run:
 docker-compose exec feedbin-web rake feedbin:make_admin[youremail@domain.tld]
 ```
 
-Once you're done, you can prevent new users from registering by modifying cour Caddy config uncommenting the `respond` directive for `/signup` and `/users` routes.
+Once you're done, you can prevent new users from registering by modifying Caddy config and uncommenting the `respond` directive for `/signup` and `/users` routes.
