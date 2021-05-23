@@ -13,7 +13,6 @@ RUN apk add --no-cache \
     ruby-bigdecimal \
     ruby-io-console \
     build-base \
-    # pkgconfig \
     imagemagick-dev \
     imagemagick-libs \
     libxml2-dev \
