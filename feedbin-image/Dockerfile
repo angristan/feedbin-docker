@@ -1,10 +1,16 @@
-FROM ruby:2.7
+FROM alpine:3.13
 
 WORKDIR /app
 
-RUN apt-get update \
-    && apt-get install -y --no-install-recommends libvips \
-    && rm -rf /var/lib/apt/lists/* \
+RUN apk add --no-cache \
+    build-base \
+    git \
+    ruby-dev \
+    ruby-etc \
+    ruby-io-console \
+    ruby-json \
+    libxml2-dev \ 
+    vips-dev \
     && git clone https://github.com/feedbin/image.git /app \
     && gem install bundler \
     && bundle install

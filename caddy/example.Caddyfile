@@ -1,27 +1,62 @@
-feedbin.domain.tld {
-  gzip
-  proxy / http://feedbin-web:3000 {
-    transparent
+(headers) {
+  header {
+    # enable HSTS
+    Strict-Transport-Security max-age=31536000;
+    # keep referrer data off of HTTP connections
+    Referrer-Policy no-referrer-when-downgrade
+    # Enable cross-site filter (XSS) and tell browser to block detected attacks
+    X-XSS-Protection "1; mode=block"
+    # Disallow the site to be rendered within a frame (clickjacking protection)
+    #X-Frame-Options "DENY"
+    # Prevent search engines from indexing (optional)
+    X-Robots-Tag "none"
+    # Server name removing
+    -Server
+    # opt-out Google FLoC
+    Permissions-Policy "interest-cohort=()"
   }
 }
 
-camo.feedbin.domain.tld {
-  gzip
-  proxy / http://camo:8081 {
-    transparent
+(encode) {
+  encode zstd gzip
+}
+
+{$FEEDBIN_HOST} {
+  import encode
+  import headers
+
+  reverse_proxy feedbin-web:3000
+
+  # respond /signup/* 403
+  # respond /users/* 403
+}
+
+{$FEEDBIN_API_HOST} {
+  import encode
+  import headers
+
+  reverse_proxy feedbin-web:3000 {
+    header_up Host api.feedbin.com
   }
 }
 
-minio.feedbin.domain.tld {
-  gzip
-  proxy / http://minio:9000 {
-    transparent
-  }
+{$MINIO_HOST} {
+  import encode
+  import headers
+
+  reverse_proxy feedbin-minio:9000
 }
 
-extract.feedbin.domain.tld {
-  gzip
-  proxy / http://feedbin-extract:3000 {
-    transparent
-  }
+{$EXTRACT_HOST} {
+  import encode
+  import headers
+
+  reverse_proxy feedbin-extract:3000
+}
+
+{$CAMO_HOST} {
+  import encode
+  import headers
+
+  reverse_proxy feedbin-camo:8081
 }

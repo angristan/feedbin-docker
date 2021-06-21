@@ -1,132 +1,220 @@
-version: '2.2'
-
-volumes:
-  feedbin_redis:
-  feedbin_db:
-  feedbin_elasticsearch:
-  feedbin_minio:
-  feedbin_caddy:
+x-common-variables: &feedbin-environment
+- PORT
+- RACK_ENV
+- RAILS_ENV
+- SECRET_KEY_BASE
+- DEFAULT_URL_OPTIONS_HOST
+- PUSH_URL
+- FEEDBIN_URL
+- FEEDBIN_HOST=$FEEDBIN_HOST,api.feedbin.com
+- FORCE_SSL
+- ELASTICSEARCH_URL
+- MEMCACHED_HOSTS
+- REDIS_URL
+- DATABASE_URL=postgres://$POSTGRES_USER:$POSTGRES_PASSWORD@feedbin-postgres/feedbin_production
+- EXTRACT_HOST
+- EXTRACT_USER
+- EXTRACT_SECRET
+- CAMO_HOST=https://$CAMO_HOST
+- CAMO_KEY
+- SMTP_ADDRESS
+- SMTP_USERNAME
+- SMTP_PASSWORD
+- SMTP_DOMAIN
+- FROM_ADDRESS
+- AWS_ACCESS_KEY_ID=$MINIO_ACCESS_KEY
+- AWS_SECRET_ACCESS_KEY=$MINIO_SECRET_KEY
+- AWS_S3_BUCKET=$MINIO_BUCKET
+- AWS_S3_BUCKET_FAVICONS=$MINIO_BUCKET
+- AWS_S3_ENDPOINT=https://$MINIO_HOST
+- AWS_S3_PATH_STYLE
+- ENTRY_IMAGE_HOST=$MINIO_HOST
+- TWITTER_KEY
+- TWITTER_SECRET
 
 services:
-
   feedbin-caddy:
-    image: abiosoft/caddy:1.0.3
-    volumes:
-      - feedbin_caddy:/etc/ssl/caddy
-      - ./caddy/Caddyfile:/etc/Caddyfile:ro
-    env_file:
-     - ./.env
+    image: caddy:alpine
+    container_name: feedbin-caddy
     ports:
       - 80:80
       - 443:443
-      - 2015:2015
-    restart: always
+    environment:
+      - FEEDBIN_HOST
+      - FEEDBIN_API_HOST
+      - MINIO_HOST
+      - EXTRACT_HOST
+      - CAMO_HOST
+    volumes:
+      - $PWD/caddy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - feedbin_caddy_data:/data
+      - feedbin_caddy_config:/config
+    restart: unless-stopped
+    depends_on:
+      - feedbin-minio
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://$FEEDBIN_HOST/health"]
+      interval: 30s
+      timeout: 20s
+      retries: 3
 
   feedbin-minio:
-    image: minio/minio
+    image: minio/minio:latest
+    container_name: feedbin-minio
+    environment:
+      - MINIO_ACCESS_KEY
+      - MINIO_SECRET_KEY
     volumes:
-    - feedbin_minio:/data
-    env_file:
-     - ./.env
+      - feedbin_minio:/data
     command: server /data
+    restart: unless-stopped
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
-    restart: always
+      interval: 30s
+      timeout: 20s
+      retries: 3
+
+  feedbin-minio-create:
+    image: minio/mc:latest
+    container_name: feedbin-minio-create
+    depends_on:
+      - feedbin-minio
+    entrypoint: >
+      /bin/sh -c "
+      /usr/bin/mc config host add minio http://feedbin-minio:9000 $MINIO_ACCESS_KEY $MINIO_SECRET_KEY;
+      /usr/bin/mc mb minio/$MINIO_BUCKET;
+      /usr/bin/mc policy set download minio/$MINIO_BUCKET;
+      exit 0;
+      "
 
   feedbin-web:
     build:
-      context: .
+      context: ./feedbin-web
       args:
-        FEEDBIN_URL: ${FEEDBIN_URL}
+        FEEDBIN_URL: $FEEDBIN_URL
+    container_name: feedbin-web
+    environment: *feedbin-environment
     depends_on:
-      - feedbin-redis
-      - feedbin-postgres
+      - feedbin-minio
       - feedbin-elasticsearch
       - feedbin-memcached
-      - feedbin-minio
-    environment:
-      PORT: 3000
+      - feedbin-redis
+      - feedbin-postgres
+    command: bundle exec rails s --port $PORT --binding 0.0.0.0
+    restart: unless-stopped
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:3000"]
-    env_file:
-     - ./.env
-    command: bundle exec rails s --port 3000 --binding 0.0.0.0
-    restart: always
-    mem_limit: 512m
+      test: ["CMD", "curl", "-f", "http://localhost:$PORT"]
+      interval: 30s
+      timeout: 20s
+      retries: 3
 
   feedbin-workers:
-    build: .
-    env_file:
-     - ./.env
+    build: ./feedbin-web
+    container_name: feedbin-workers
+    environment: *feedbin-environment
     command: foreman start
-    restart: always
-    mem_limit: 512m
+    restart: unless-stopped
 
   feedbin-elasticsearch:
     image: elasticsearch:2.4
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:9200"]
-    volumes:
-      - feedbin_elasticsearch:/usr/share/elasticsearch/data
+    container_name: feedbin-elasticsearch
     environment:
       - bootstrap.memory_lock=true
       - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
       - discovery.type=single-node
+    volumes:
+      - feedbin_elasticsearch:/usr/share/elasticsearch/data
     ulimits:
       memlock:
         soft: -1
         hard: -1
-    mem_limit: 1g
-    restart: always
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9200"]
+      interval: 30s
+      timeout: 20s
+      retries: 3
 
   feedbin-refresher:
     build: ./feedbin-refresher
-    env_file:
-     - ./.env
-    restart: always
-    mem_limit: 512m
+    environment:
+      - REDIS_URL
+      - TWITTER_KEY
+      - TWITTER_SECRET
+    container_name: feedbin-refresher
+    restart: unless-stopped
 
   feedbin-image:
     build: ./feedbin-image
-    env_file:
-      - ./.env
-    restart: always
-    mem_limit: 512m
-
-  camo:
-    image: increments/camo
     environment:
-      - PORT=8081
-    env_file:
-     - ./.env
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8081"]
-    restart: always
-
-  feedbin-memcached:
-    image: memcached:1.5
-    restart: always
-
-  feedbin-redis:
-    image: redis:5
-    command: "redis-server --appendonly yes"
-    volumes:
-      - feedbin_redis:/data
-    restart: always
-
-  feedbin-postgres:
-    image: postgres:13
-    env_file:
-     - ./.env
-    volumes:
-      - feedbin_db:/var/lib/postgresql/data
-    restart: always
-    mem_limit: 512m
+      - AWS_ACCESS_KEY_ID=$MINIO_ACCESS_KEY
+      - AWS_SECRET_ACCESS_KEY=$MINIO_SECRET_KEY
+      - AWS_S3_BUCKET=$MINIO_BUCKET
+      - AWS_S3_ENDPOINT=https://$MINIO_HOST
+      - AWS_S3_PATH_STYLE
+      - REDIS_URL
+    container_name: feedbin-image
+    restart: unless-stopped
 
   feedbin-extract:
     build:
       context: ./feedbin-extract
-    env_file:
-      - ./.env
-    restart: always
-    mem_limit: 512m
+      args:
+        EXTRACT_USER: $EXTRACT_USER
+        EXTRACT_SECRET: $EXTRACT_SECRET
+    container_name: feedbin-extract
+    restart: unless-stopped
+
+  camo:
+    image: increments/camo
+    container_name: feedbin-camo
+    environment:
+      - PORT=8081
+      - CAMO_KEY
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8081"]
+      interval: 30s
+      timeout: 20s
+      retries: 3
+
+  feedbin-memcached:
+    image: memcached:1.6-alpine
+    container_name: feedbin-memcached
+    restart: unless-stopped
+
+  feedbin-redis:
+    image: redis:6-alpine
+    container_name: feedbin-redis
+    volumes:
+      - feedbin_redis:/data
+    command: "redis-server --appendonly yes"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 20s
+      retries: 3
+
+  feedbin-postgres:
+    image: postgres:13-alpine
+    container_name: feedbin-postgres
+    environment:
+      - POSTGRES_USER
+      - POSTGRES_PASSWORD
+    volumes:
+      - feedbin_db:/var/lib/postgresql/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $POSTGRES_USER"]
+      interval: 30s
+      timeout: 20s
+      retries: 3
+
+volumes:
+  feedbin_caddy_data:
+  feedbin_caddy_config:
+  feedbin_minio:
+  feedbin_elasticsearch:
+  feedbin_redis:
+  feedbin_db:

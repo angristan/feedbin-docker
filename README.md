@@ -41,7 +41,7 @@ git clone https://github.com/angristan/feedbin-docker.git
 
 * Copy `.env.example` to `.env` and fill **ALL** the variables
 * Copy `docker-compose-example.yml` to `docker-compose.yml`. If you want to disable a service this is the place.
-* Copy `caddy/example.Caddyfile` to `caddy/Caddyfile` and update the domains.
+* Copy `caddy/example.Caddyfile` to `caddy/Caddyfile` and update the configuration if you need.
 
 Run the database migrations:
 
@@ -57,16 +57,6 @@ docker-compose up -d
 
 You can check if everything is going well with `docker-compose logs -f` or `docker-compose ps`.
 
-Go to `minio.feedbin.domain.tld`, login with your keys. Then:
-
-* Create a bucket with the button in the bottom right hand corner.
-* Make the bucket public:
-  * On the left sidebar, clic on the 3 dots on thee bucket line
-  * Select add policy
-  * Leave prefix empty (or `*`) and `Read Only` and then select `Add`.
-
-Your bucket is ready.
-
 Now go to `feedbin.domain.tld` and create a new account. You're set!
 
 You can make yourself an admin to manage users and to view the Sidekiq web interface.
@@ -77,4 +67,4 @@ To do so, run:
 docker-compose exec feedbin-web rake feedbin:make_admin[youremail@domain.tld]
 ```
 
-Once you're done, you can prevent new users from registering by [modifying cour Caddy config](https://github.com/angristan/feedbin-docker/issues/3#issuecomment-700286769).
+Once you're done, you can prevent new users from registering by modifying Caddy config and uncommenting the `respond` directive for `/signup` and `/users` routes.
